@@ -205,9 +205,11 @@ main(int argc,char **argv)
     std::string inputFileName;
     std::string outputPrefix;
     std::string outputDirectory="";
-    double widthImageScan = {200};
-    double heightImageScan = {200};
-    int maxScan {10};
+    double widthImageScan = {50};
+    double heightImageScan = {50};
+    double minDiagDist = std::sqrt((heightImageScan*heightImageScan)+
+                                                    (heightImageScan*heightImageScan));
+    int maxScan {1};
 
     CLI::App app;
     app.description("Allowed options are: ");
@@ -229,9 +231,9 @@ main(int argc,char **argv)
     double diagDist = (b.first-b.second).norm();
     trace.info() << diagDist<< std::endl ;
     
-    if(diagDist<100){
-        trace.info() << "modify mesh scale... (to diagonal = "<< 100<<")";
-        meshScale = 100/diagDist;
+    if(diagDist<minDiagDist){
+        trace.info() << "modify mesh scale... (to diagonal = "<< minDiagDist<<")";
+        meshScale = minDiagDist/diagDist;
         oriMesh.rescale(meshScale);
         trace.info() << " [done] "<< std::endl ;
     }
