@@ -42,8 +42,8 @@ template<typename TImage, typename TVectorField, typename TPoint>
 void
 fillPointArea(TImage &anImage, TVectorField &imageVectorField, const TPoint aPoint, const unsigned int size, const unsigned int value, const Z3i::RealPoint &n){
 
-  typename TImage::Domain aDom(aPoint-TPoint::diagonal(size), aPoint+TPoint::diagonal(size));
-
+  //typename TImage::Domain aDom(aPoint-TPoint::diagonal(size), aPoint+TPoint::diagonal(size));
+  typename TImage::Domain aDom(aPoint - Z3i::Point(1, 1, 1), aPoint + Z3i::Point(0, 0, 0));
   for(typename TImage::Domain::ConstIterator it= aDom.begin(); it != aDom.end(); it++){
 
     if (anImage.domain().isInside(*it)){
@@ -205,11 +205,11 @@ main(int argc,char **argv)
     std::string inputFileName;
     std::string outputPrefix;
     std::string outputDirectory="";
-    double widthImageScan = {50};
-    double heightImageScan = {50};
-    double minDiagDist = std::sqrt((heightImageScan*heightImageScan)+
+    double widthImageScan = {400};
+    double heightImageScan = {400};
+    double minDiagDist = std::sqrt((widthImageScan*widthImageScan)+
                                                     (heightImageScan*heightImageScan));
-    int maxScan {1};
+    int maxScan {180};
 
     CLI::App app;
     app.description("Allowed options are: ");
@@ -237,7 +237,7 @@ main(int argc,char **argv)
         oriMesh.rescale(meshScale);
         trace.info() << " [done] "<< std::endl ;
     }
-    int triangleAreaUnit = 0.1;
+    int triangleAreaUnit = 1.;
     triangleAreaUnit *= meshScale;
     oriMesh.vertexBegin();
     oriMesh.quadToTriangularFaces();
@@ -264,7 +264,8 @@ main(int argc,char **argv)
       meshVolImage.setValue(*it, 0);
       meshNormalImage.setValue(*it, Z3i::RealPoint(0.0,0.0,0.0));
     }
-    trace.info()<< "Fill 3d vol "<< maxArea;
+    trace.info()<< "Fill 3d vol "<< maxArea<< std::endl;
+    trace.info()<< "nombre de face du maillage : "<< oriMesh.nbFaces() << std::endl;
     for (int i = 0; i < oriMesh.nbFaces(); i++){
       Face currentFace = oriMesh.getFace(i);
       Z3i::RealPoint aPoint = (oriMesh.getVertex(currentFace.at(0))+
@@ -275,7 +276,7 @@ main(int argc,char **argv)
     }
     trace.info() << " [done]"<< std::endl;
     /**create profile image**/
-    Image2D::Domain aDomain2D(DGtal::Z2i::Point(0,0),DGtal::Z2i::Point(widthImageScan, heightImageScan));
+    Image2D::Domain aDomain2D(DGtal::Z2i::Point(0,0),DGtal::Z2i::Point(widthImageScan-1, heightImageScan-1));
     Image2D profil_main = compute2D_profile(dir.first,
                                       dir.second, 
                                       widthImageScan,
